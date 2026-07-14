@@ -20,35 +20,35 @@ Deploy a classic web / app / DB tier architecture with high availability, using 
 •Data tier: Amazon RDS (MySQL), Multi-AZ subnet group\
 •Region: eu-north-1 (Stockholm), Availability Zones eu-north-1a and eu-north-1b\
 1.3 Security Model\
-Security group chain: alb-sg (0.0.0.0/0 → 80/443) → app-sg (only from alb-sg) → db-sg (only from app-sg). Each tier only accepts traffic from the tier directly above it  never a raw IP range for internal traffic so EC2 instances can be replaced by Auto Scaling without breaking any rule.\
+Security group chain: alb-sg (0.0.0.0/0 → 80/443) → app-sg (only from alb-sg) → db-sg (only from app-sg). Each tier only accepts traffic from the tier directly above it  never a raw IP range for internal traffic so EC2 instances can be replaced by Auto Scaling without breaking any rule.
 3. Architecture\
 Traffic flows from the internet through the ALB in the public subnets, which distributes requests across EC2 instances in the private application subnets. The application tier connects to the RDS database in the private data subnets. Only the ALB is reachable from the public internet the application and data tiers have no public IP addresses.
-2.1 Traffic Flow Summary
-•Internet users → ALB (public subnets, ports 80/443)
-•ALB → EC2 Auto Scaling Group (private app subnets, port 80)
-•EC2 app tier → RDS MySQL (private data subnets, port 3306)
+2.1 Traffic Flow Summary\
+•Internet users → ALB (public subnets, ports 80/443)\
+•ALB → EC2 Auto Scaling Group (private app subnets, port 80)\
+•EC2 app tier → RDS MySQL (private data subnets, port 3306)\
 <img width="1160" height="668" alt="image" src="https://github.com/user-attachments/assets/7e726605-f832-46ff-b4b0-b44344a4fa63" />
 
 Figure 2 — VPC resource map (subnets, route tables, gateways)
-3. Networking
-VPC: three-tier-vpc — CIDR block 10.0.0.0/16, spanning two Availability Zones (eu-north-1a, eu-north-1b). Public subnets host the ALB; private subnets host the EC2 application instances and RDS database.
-3.1 Subnets
-Subnet Name	CIDR Block	Availability Zone	Type
-public-subnet-1	10.0.1.0/24	eu-north-1a	Public
-public-subnet-2	10.0.2.0/24	eu-north-1b	Public
-app-subnet-1	10.0.11.0/24	eu-north-1a	Private
-app-subnet-2	10.0.12.0/24	eu-north-1b	Private
-db-subnet-1	10.0.21.0/24	eu-north-1a	Private
-db-subnet-2	10.0.22.0/24	eu-north-1b	Private
+3. Networking\
+VPC: three-tier-vpc — CIDR block 10.0.0.0/16, spanning two Availability Zones (eu-north-1a, eu-north-1b). Public subnets host the ALB; private subnets host the EC2 application instances and RDS database.\
+3.1 Subnets\
+Subnet Name	CIDR Block	Availability Zone	Type\
+public-subnet-1	10.0.1.0/24	eu-north-1a	Public\
+public-subnet-2	10.0.2.0/24	eu-north-1b	Public\
+app-subnet-1	10.0.11.0/24	eu-north-1a	Private\
+app-subnet-2	10.0.12.0/24	eu-north-1b	Private\
+db-subnet-1	10.0.21.0/24	eu-north-1a	Private\
+db-subnet-2	10.0.22.0/24	eu-north-1b	Private\
 <img width="1160" height="636" alt="image" src="https://github.com/user-attachments/assets/d3aea84b-e8c3-4fb1-b588-14def3473866" />
 
-Figure 3 — Subnets as provisioned in the AWS Console
-3.2 Routing
-Route Table	Destination	Target	Associated Subnets
-public-route-table	10.0.0.0/16	local	public-subnet-1, public-subnet-2
-public-route-table	0.0.0.0/0	Internet Gateway (three-tier-igw)	public-subnet-1, public-subnet-2
-private-route-table	10.0.0.0/16	local	app + db subnets (all four)
-private-route-table	0.0.0.0/0	NAT Gateway (three-tier-nat)	app + db subnets (all four)
+Figure 3 — Subnets as provisioned in the AWS Console\
+3.2 Routing\
+Route Table	Destination	Target	Associated Subnets\
+public-route-table	10.0.0.0/16	local	public-subnet-1, public-subnet-2\
+public-route-table	0.0.0.0/0	Internet Gateway (three-tier-igw)	public-subnet-1, public-subnet-2\
+private-route-table	10.0.0.0/16	local	app + db subnets (all four)\
+private-route-table	0.0.0.0/0	NAT Gateway (three-tier-nat)	app + db subnets (all four)\
 A single zonal NAT Gateway (three-tier-nat) sits in public-subnet-1 and allows outbound internet access from the private subnets (e.g. for OS package updates) without exposing them to inbound traffic.
 <img width="1160" height="617" alt="image" src="https://github.com/user-attachments/assets/24dd845a-8508-409b-8b4d-b5be661d11a3" />
 
