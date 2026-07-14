@@ -16,11 +16,11 @@ This project implements a classic three-tier web application architecture on AWS
 Deploy a classic web / app / DB tier architecture with high availability, using Amazon EC2, an Application Load Balancer (ALB), Auto Scaling, Amazon RDS, and a VPC with public/private subnet separation.
 
 1.2 Tech Stack\
-•Networking: Amazon VPC with public and private subnets across two Availability Zones\
-•Presentation tier: Application Load Balancer (ALB)\
-•Application tier: Amazon EC2 instances managed by an Auto Scaling Group (ASG)\
-•Data tier: Amazon RDS (MySQL), Multi-AZ subnet group\
-•Region: eu-north-1 (Stockholm), Availability Zones eu-north-1a and eu-north-1b\
+• Networking: Amazon VPC with public and private subnets across two Availability Zones\
+• Presentation tier: Application Load Balancer (ALB)\
+• Application tier: Amazon EC2 instances managed by an Auto Scaling Group (ASG)\
+• Data tier: Amazon RDS (MySQL), Multi-AZ subnet group\
+• Region: eu-north-1 (Stockholm), Availability Zones eu-north-1a and eu-north-1b\
 
 1.3 Security Model\
 Security group chain: alb-sg (0.0.0.0/0 → 80/443) → app-sg (only from alb-sg) → db-sg (only from app-sg). Each tier only accepts traffic from the tier directly above it  never a raw IP range for internal traffic so EC2 instances can be replaced by Auto Scaling without breaking any rule.
@@ -30,9 +30,9 @@ Traffic flows from the internet through the ALB in the public subnets, which dis
 
 2.1 Traffic Flow Summary\
 
-•Internet users → ALB (public subnets, ports 80/443)\
-•ALB → EC2 Auto Scaling Group (private app subnets, port 80)\
-•EC2 app tier → RDS MySQL (private data subnets, port 3306)\
+• Internet users → ALB (public subnets, ports 80/443)\
+• ALB → EC2 Auto Scaling Group (private app subnets, port 80)\
+• EC2 app tier → RDS MySQL (private data subnets, port 3306)\
 <img width="1160" height="668" alt="image" src="https://github.com/user-attachments/assets/7e726605-f832-46ff-b4b0-b44344a4fa63" />
 
 Figure 2 — VPC resource map (subnets, route tables, gateways)
@@ -87,21 +87,21 @@ Figure 6 — NAT Gateway (three-tier-nat)
    
 5.1 Networking Foundation\
 
-•Created VPC three-tier-vpc (10.0.0.0/16)\
-•Created 6 subnets across 2 AZs (public, app, db tiers)\
-•Created and attached Internet Gateway three-tier-igw\
-•Created zonal NAT Gateway three-tier-nat in public-subnet-1 with an Elastic IP\
-•Created public and private route tables and associated the correct subnets\
+• Created VPC three-tier-vpc (10.0.0.0/16)\
+• Created 6 subnets across 2 AZs (public, app, db tiers)\
+• Created and attached Internet Gateway three-tier-igw\
+• Created zonal NAT Gateway three-tier-nat in public-subnet-1 with an Elastic IP\
+• Created public and private route tables and associated the correct subnets\
 
 **5.2 Security Groups**\
-•Created alb-sg, app-sg, and db-sg, each scoped to allow traffic only from the tier above\
+• Created alb-sg, app-sg, and db-sg, each scoped to allow traffic only from the tier above\
 
 **5.3 Database Tier**\
 
-•Created DB subnet group three-tier-db-subnet-group across db-subnet-1 and db-subnet-2\
-•Created RDS MySQL instance three-tier-db (db.t3.micro, 20 GB gp3, Free Tier eligible)\
-•Public access disabled; attached security group db-sg only\
-•Initial database name: appdb\
+• Created DB subnet group three-tier-db-subnet-group across db-subnet-1 and db-subnet-2\
+• Created RDS MySQL instance three-tier-db (db.t3.micro, 20 GB gp3, Free Tier eligible)\
+• Public access disabled; attached security group db-sg only\
+• Initial database name: appdb\
 
 **5.4 Application Tier**\
 
