@@ -10,6 +10,7 @@ Services: EC2, Application Load Balancer, Auto Scaling, RDS (MySQL) and VPC
 Figure 1 — High-Level Design (HLD): Three-tier VPC architecture
 
 1. Project Overview\
+   
 This project implements a classic three-tier web application architecture on AWS. The goal was to deploy a highly available, secure web application with clearly separated presentation, application, and data layers, each isolated at the network level.\
 
 1.1 Goal\
