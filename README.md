@@ -1,14 +1,13 @@
 # Three-Tier-Web-App-on-AWS-EC2
 
-THREE-TIER WEB APP ON AWS
+THREE-TIER WEB APP ON AWS EC2
 High-Level Design, Deployment & Testing Documentation
 AWS Region: eu-north-1 (Stockholm)
-Services: EC2 · Application Load Balancer · Auto Scaling · RDS (MySQL) · VPC
+Services: EC2, Application Load Balancer, Auto Scaling, RDS (MySQL) and VPC
 
 <img width="1160" height="674" alt="image" src="https://github.com/user-attachments/assets/dba4951f-8f37-41d0-a6ef-2ab29ad10d7c" />
 
 Figure 1 — High-Level Design (HLD): Three-tier VPC architecture
-
 
 1. Project Overview
 This project implements a classic three-tier web application architecture on AWS. The goal was to deploy a highly available, secure web application with clearly separated presentation, application, and data layers, each isolated at the network level.
@@ -74,21 +73,20 @@ Figure 6 — NAT Gateway (three-tier-nat)
 •Created and attached Internet Gateway three-tier-igw
 •Created zonal NAT Gateway three-tier-nat in public-subnet-1 with an Elastic IP
 •Created public and private route tables and associated the correct subnets
-5.2 Security Groups
+**5.2 Security Groups**
 •Created alb-sg, app-sg, and db-sg, each scoped to allow traffic only from the tier above
-5.3 Database Tier
+**5.3 Database Tier**
 •Created DB subnet group three-tier-db-subnet-group across db-subnet-1 and db-subnet-2
 •Created RDS MySQL instance three-tier-db (db.t3.micro, 20 GB gp3, Free Tier eligible)
 •Public access disabled; attached security group db-sg only
 •Initial database name: appdb
-5.4 Application Tier
+**5.4 Application Tier**
 •Created EC2 key pair, three-tier-key
 •Created Launch Template, three-tier-app-template (Amazon Linux 2023, t2/t3.micro, app-sg, user-data installs Apache httpd)
 •Created Auto Scaling Group three-tier-asg across app-subnet-1 and app-subnet-2 (min 2, max 4, target tracking on CPU 50%)
 <img width="1160" height="544" alt="image" src="https://github.com/user-attachments/assets/ab3c1a4f-cf3a-4cbe-838a-9cab3ca74ce8" />
-
 Figure 7 — Database configuration (three-tier-asg)
-5.5 Load Balancer
+**5.5 Load Balancer**
 •Created an internet-facing Application Load Balancer (three-tier-alb) in the public subnets
 •Created a target group app-tier-tg (HTTP:80, target type: Instance) pointing to the Auto Scaling Group
 •Attached a listener on port 80 to route traffic to the target group
@@ -97,12 +95,12 @@ DNS: three-tier-alb-16239136.eu-north-1.elb.amazonaws.com
 <img width="1204" height="635" alt="image" src="https://github.com/user-attachments/assets/591e9eec-a415-44be-a0d8-587d27320b82" />
 
 Figure 8 — Application Load Balancer successfully distributing traffic to a backend EC2 instance across Availability Zones
-5.6 Validation & Testing
+**5.6 Validation & Testing**
 •Confirmed the ALB DNS name serves the web page from the app tier
 •Verified high availability by testing instance replacement / failover across Availability Zones
 •Confirmed EC2 instances have no public IP and RDS is not publicly accessible
 6. Testing & Validation
-6.1 Results Summary
+**6.1 Results Summary**
 Test	Expected Result	Outcome
 Hit ALB DNS name in browser	Web page served from an app-tier EC2 instance	Passed
 High availability / failover	Traffic continues to be served if an instance is replaced	Passed
@@ -121,7 +119,7 @@ Fix: Edited the Auto Scaling Group (three-tier-asg → Edit → Load balancing) 
 Result after fix: Target group showed 2/2 healthy targets, and subsequent ALB refreshes correctly alternated between both instances again. This link persists going forward  any future instance replacements by the ASG will automatically register with the target group without manual steps.
 6.5 Connectivity Troubleshooting Note
 Early in ALB testing, the DNS endpoint returned ERR_CONNECTION_REFUSED despite all configuration (security groups, listener, target health) appearing correct. This resolved itself after allowing a few minutes for ALB provisioning/DNS propagation to complete  a useful reminder that a newly "Active" ALB isn't always immediately reachable.
-7. Key Learnings
+**7. Key Learnings**
 •ASG + ALB integration requires an explicit, persistent link manually registering instances with a target group during setup does not extend to instances the ASG creates later. The target group must be attached at the ASG level for self-healing to work end-to-end.
 •Stopping vs. terminating an ASG-managed instance behaves differently than expected an ASG treats a "stopped" instance as unhealthy and will terminate + replace it rather than leaving it stopped, since ASGs are designed to maintain a target count of running instances.
 •DNS propagation delay on a freshly created ALB can cause transient connection failures even when configuration is correct worth waiting a minute before troubleshooting further.
