@@ -9,7 +9,7 @@ Services: EC2, Application Load Balancer, Auto Scaling, RDS (MySQL) and VPC
 
 Figure 1 — High-Level Design (HLD): Three-tier VPC architecture
 
-1. Project Overview\
+1. Project Overview
    
 This project implements a classic three-tier web application architecture on AWS. The goal was to deploy a highly available, secure web application with clearly separated presentation, application, and data layers, each isolated at the network level.\
 
@@ -26,19 +26,20 @@ Deploy a classic web / app / DB tier architecture with high availability, using 
 1.3 Security Model\
 Security group chain: alb-sg (0.0.0.0/0 → 80/443) → app-sg (only from alb-sg) → db-sg (only from app-sg). Each tier only accepts traffic from the tier directly above it  never a raw IP range for internal traffic so EC2 instances can be replaced by Auto Scaling without breaking any rule.
 
-3. Architecture\
+3. Architecture
 Traffic flows from the internet through the ALB in the public subnets, which distributes requests across EC2 instances in the private application subnets. The application tier connects to the RDS database in the private data subnets. Only the ALB is reachable from the public internet the application and data tiers have no public IP addresses.
 
 2.1 Traffic Flow Summary\
 
-• Internet users → ALB (public subnets, ports 80/443)\
-• ALB → EC2 Auto Scaling Group (private app subnets, port 80)\
-• EC2 app tier → RDS MySQL (private data subnets, port 3306)\
+• Internet users → ALB (public subnets, ports 80/443)
+• ALB → EC2 Auto Scaling Group (private app subnets, port 80)
+• EC2 app tier → RDS MySQL (private data subnets, port 3306)
+
 <img width="1160" height="668" alt="image" src="https://github.com/user-attachments/assets/7e726605-f832-46ff-b4b0-b44344a4fa63" />
 
 Figure 2 — VPC resource map (subnets, route tables, gateways)
 
-3. Networking\
+3. Networking
 VPC: three-tier-vpc — CIDR block 10.0.0.0/16, spanning two Availability Zones (eu-north-1a, eu-north-1b). Public subnets host the ALB; private subnets host the EC2 application instances and RDS database.
 
 3.1 Subnets\
