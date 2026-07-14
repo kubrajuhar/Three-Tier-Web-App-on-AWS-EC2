@@ -28,6 +28,7 @@ Traffic flows from the internet through the ALB in the public subnets, which dis
 •Internet users → ALB (public subnets, ports 80/443)
 •ALB → EC2 Auto Scaling Group (private app subnets, port 80)
 •EC2 app tier → RDS MySQL (private data subnets, port 3306)
+<img width="1160" height="668" alt="image" src="https://github.com/user-attachments/assets/7e726605-f832-46ff-b4b0-b44344a4fa63" />
 
 Figure 2 — VPC resource map (subnets, route tables, gateways)
 3. Networking
@@ -40,6 +41,7 @@ app-subnet-1	10.0.11.0/24	eu-north-1a	Private
 app-subnet-2	10.0.12.0/24	eu-north-1b	Private
 db-subnet-1	10.0.21.0/24	eu-north-1a	Private
 db-subnet-2	10.0.22.0/24	eu-north-1b	Private
+<img width="1160" height="636" alt="image" src="https://github.com/user-attachments/assets/d3aea84b-e8c3-4fb1-b588-14def3473866" />
 
 Figure 3 — Subnets as provisioned in the AWS Console
 3.2 Routing
@@ -49,8 +51,10 @@ public-route-table	0.0.0.0/0	Internet Gateway (three-tier-igw)	public-subnet-1, 
 private-route-table	10.0.0.0/16	local	app + db subnets (all four)
 private-route-table	0.0.0.0/0	NAT Gateway (three-tier-nat)	app + db subnets (all four)
 A single zonal NAT Gateway (three-tier-nat) sits in public-subnet-1 and allows outbound internet access from the private subnets (e.g. for OS package updates) without exposing them to inbound traffic.
+<img width="1160" height="617" alt="image" src="https://github.com/user-attachments/assets/24dd845a-8508-409b-8b4d-b5be661d11a3" />
 
 Figure 4 — Route tables
+<img width="1160" height="596" alt="image" src="https://github.com/user-attachments/assets/28a17fbe-f733-4700-b45e-5ddc98a0ebe1" />
 
 Figure 5 — Internet Gateway (three-tier-igw)
 4. Security Groups
@@ -60,8 +64,9 @@ alb-sg	HTTP 80 / HTTPS 443	0.0.0.0/0	Public entry point
 app-sg	HTTP 80	alb-sg	Only ALB can reach app tier
 app-sg	SSH 22 (optional)	My IP	Troubleshooting access
 db-sg	MySQL/Aurora 3306	app-sg	Only app tier can reach database
+<img width="1160" height="666" alt="image" src="https://github.com/user-attachments/assets/45ebc38d-995c-4ec8-bd94-af2d352413af" />
 
-Figure 7 — NAT Gateway (three-tier-nat)
+Figure 6 — NAT Gateway (three-tier-nat)
 5. Deployment Steps Summary
 5.1 Networking Foundation
 •Created VPC three-tier-vpc (10.0.0.0/16)
@@ -80,15 +85,18 @@ Figure 7 — NAT Gateway (three-tier-nat)
 •Created EC2 key pair, three-tier-key
 •Created Launch Template, three-tier-app-template (Amazon Linux 2023, t2/t3.micro, app-sg, user-data installs Apache httpd)
 •Created Auto Scaling Group three-tier-asg across app-subnet-1 and app-subnet-2 (min 2, max 4, target tracking on CPU 50%)
+<img width="1160" height="544" alt="image" src="https://github.com/user-attachments/assets/ab3c1a4f-cf3a-4cbe-838a-9cab3ca74ce8" />
 
-Figure 8 — Database configuration (three-tier-asg)
+Figure 7 — Database configuration (three-tier-asg)
 5.5 Load Balancer
 •Created an internet-facing Application Load Balancer (three-tier-alb) in the public subnets
 •Created a target group app-tier-tg (HTTP:80, target type: Instance) pointing to the Auto Scaling Group
 •Attached a listener on port 80 to route traffic to the target group
 DNS: three-tier-alb-16239136.eu-north-1.elb.amazonaws.com
+<img width="1160" height="598" alt="image" src="https://github.com/user-attachments/assets/ae8e986b-8cb6-436b-ada5-4ab98d0e10d8" />
+<img width="1204" height="635" alt="image" src="https://github.com/user-attachments/assets/591e9eec-a415-44be-a0d8-587d27320b82" />
 
-Figure 9 — Application Load Balancer & target group health
+Figure 8 — Application Load Balancer successfully distributing traffic to a backend EC2 instance across Availability Zones
 5.6 Validation & Testing
 •Confirmed the ALB DNS name serves the web page from the app tier
 •Verified high availability by testing instance replacement / failover across Availability Zones
