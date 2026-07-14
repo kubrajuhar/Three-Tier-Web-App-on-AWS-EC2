@@ -26,7 +26,7 @@ Deploy a classic web / app / DB tier architecture with high availability, using 
 1.3 Security Model\
 Security group chain: alb-sg (0.0.0.0/0 → 80/443) → app-sg (only from alb-sg) → db-sg (only from app-sg). Each tier only accepts traffic from the tier directly above it  never a raw IP range for internal traffic so EC2 instances can be replaced by Auto Scaling without breaking any rule.
 
-3. Architecture
+2. Architecture
 Traffic flows from the internet through the ALB in the public subnets, which distributes requests across EC2 instances in the private application subnets. The application tier connects to the RDS database in the private data subnets. Only the ALB is reachable from the public internet the application and data tiers have no public IP addresses.
 
 2.1 Traffic Flow Summary
