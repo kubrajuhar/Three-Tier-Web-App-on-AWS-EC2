@@ -5,6 +5,7 @@ High-Level Design, Deployment & Testing Documentation
 AWS Region: eu-north-1 (Stockholm)
 Services: EC2 · Application Load Balancer · Auto Scaling · RDS (MySQL) · VPC
 
+<img width="1160" height="674" alt="image" src="https://github.com/user-attachments/assets/dba4951f-8f37-41d0-a6ef-2ab29ad10d7c" />
 
 Figure 1 — High-Level Design (HLD): Three-tier VPC architecture
 
